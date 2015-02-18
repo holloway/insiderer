@@ -2,22 +2,28 @@
 <img src="static/insiderer.png" alt="Insiderer">
 </p>
 
-Insiderer looks inside files for metadata and hidden content
+Insiderer looks inside files for metadata and hidden files and content. These may include authors, deleted content, and geolocation.
 
-It's a webservice that start on localhost:80
+Unlike most other equivalent tools, Insiderer reports on every image inside .docx (each image may include authorship, geolocation), and it will show any track-changes within the document. Many modern formats are essentially containers for many different types of files, and so Insiderer allows you to view a hierarchy of metadata about the files you give it.
 
-Dependencies
-------------
+Insiderer may be useful to analysing your own files in order to see what metadata you are leaking when you publish files onto the internet. Insiderer is free and open source, and it may be run on your own computer (bonus privacy).
 
-[Docvert](https://github.com/holloway/docvert-python3) is expected to be running on port 8080
+Insiderer is a work in progress. If you find a bug, or if a file doesn't work, please [report a testcase](https://github.com/holloway/insiderer/issues).
 
-Install (Debian/Ubuntu)
------------------------
+Quickstart Guide (Debian/Ubuntu)
+================================
 
     sudo apt-get install python3 python3-magic python3-pip libmagickwand-dev python3-pdfminer
     sudo pip3 install exifread wand
 
 Usage
------
+=====
 
     python3 insiderer.py
+
+Recommended Dependencies
+=====================
+
+[Docvert](https://github.com/holloway/docvert-python3) is expected to be running on port 8080. Without Docvert it can't process office files.
+
+
