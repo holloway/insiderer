@@ -2,11 +2,11 @@
 <img src="static/insiderer.png" alt="Insiderer">
 </p>
 
-Insiderer looks inside files for metadata and hidden files and content. These may include authors, deleted content, and geolocation.
+Insiderer looks inside files for metadata and hidden files and content. This metadat may include information on authorship, deleted content, and geolocation among many other pieces of information.
 
-Unlike most other equivalent tools, Insiderer reports on every image inside .docx (each image may include authorship, geolocation), and it will show any track-changes within the document. Many modern formats are essentially containers for many different types of files, and so Insiderer allows you to view a hierarchy of metadata about the files you give it.
+Unlike most other equivalent tools, Insiderer attempts to report on every file within the files you give it. Many modern formats are essentially containers for many different types of files, and so Insiderer allows you to view a hierarchy of metadata about the files you give it. For example, .docx files may contain images and those images may include authorship, geolocation, and subdocuments. Those subdocuments may have deleted content.
 
-Insiderer may be useful to analysing your own files in order to see what metadata you are leaking when you publish files onto the internet. Insiderer is free and open source, and it may be run on your own computer (bonus privacy).
+Insiderer may be useful to analysing your own files in order to see what metadata you are leaking to the public when you publish files onto the internet. Insiderer is free and open source, and it may be run on your own computer (bonus privacy!).
 
 Insiderer is a work in progress. If you find a bug, or if a file doesn't work, please [report a testcase](https://github.com/holloway/insiderer/issues).
 
