@@ -1,5 +1,5 @@
 <p align="center">
-<img src="insiderer.png" alt="Insiderer">
+<img src="static/insiderer.png" alt="Insiderer">
 </p>
 
 Insiderer looks inside files for metadata and hidden content
