@@ -1,0 +1,60 @@
+body {
+  background: url("background.jpg");
+  font-family:sans-serif;
+}
+
+#logo {
+  text-align:center;
+  background: #f6f6f6;
+  transform: skewX(2deg) skewY(1deg);
+  width: 500px;
+  border-radius: 10px;
+  padding:10px;
+  margin: 20px auto 0px auto;
+}
+
+
+form {
+  display:block;
+  background: #fff;
+  margin-top:10px;
+  width:300px;
+  margin: 20px auto;
+  position:relative;
+  padding: 1px;
+  transform: skewX(-1deg) skewY(-1deg);
+}
+
+input {
+  display: block;
+  width:100%;
+}
+
+input[type=file] {
+  position:absolute;
+  top:0px;
+  opacity: 0.01;
+  cursor:pointer;
+}
+
+span {
+  color: #37abc8;
+  display: block;
+  text-align:center;
+  margin:0.5em;
+  padding: 0.2em;
+  font-weight:bold;
+}
+
+#loading {
+  margin: 10px auto;
+  background: url("loading.gif") no-repeat center center;
+  width:150px;
+  height:150px;
+  transform: scale(0.01);
+  transition: all 0.25s;
+}
+
+#loading.show {
+  transform: scale(1);
+}
