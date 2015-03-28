@@ -13,8 +13,8 @@ Insiderer is a work in progress. If you find a bug, or if a file doesn't work, p
 Quickstart Guide (Debian/Ubuntu)
 ================================
 
-    sudo apt-get install python3 python3-magic python3-pip libmagickwand-dev python3-pdfminer
-    sudo pip3 install exifread wand
+    sudo apt-get install python3 python3-magic python3-pip libmagickwand-dev python3-pdfminer python3-tk
+    sudo pip3 install cherrypy exifread wand cython pyOpenSSL
 
 Usage
 =====
