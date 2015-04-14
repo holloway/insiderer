@@ -3,6 +3,13 @@ import io
 import zipfile
 import tempfile
 import mimes.application_vnd_oasis_opendocument_text as application_vnd_oasis_opendocument_text
+try:
+  parent_directory = os.path.dirname(os.path.dirname(__file__))
+  sys.path.insert(0, parent_directory)
+  import insiderer
+except ImportError as e:
+  print(e)
+  pass
 
 def application_msword(path, metadata, children):
   response = None
@@ -24,7 +31,7 @@ def application_msword(path, metadata, children):
   for name in myzip.namelist():
     if not name.endswith(".odt"):
       continue
-    tmp_path = tempfile.mkdtemp(dir='/run/')
+    tmp_path = tempfile.mkdtemp(dir=insiderer.TMP_DIR)
     myzip.extract(name, tmp_path)
     odt_path = tmp_path + "/" + name
     application_vnd_oasis_opendocument_text.application_vnd_oasis_opendocument_text(odt_path, metadata, children, True)

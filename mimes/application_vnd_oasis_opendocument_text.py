@@ -15,7 +15,8 @@ except ImportError as e:
 def application_vnd_oasis_opendocument_text(path, metadata, children, from_doc=False):
   odtzip = zipfile.ZipFile(path)
   try:
-    tmp_path = tempfile.mkdtemp(dir='/run/')
+    tmp_path = None
+    tmp_path = tempfile.mkdtemp(dir=insiderer.TMP_DIR)
     odtzip.extractall(tmp_path)
     for name in odtzip.namelist():
       childpath = tmp_path + "/" + name
@@ -30,6 +31,7 @@ def application_vnd_oasis_opendocument_text(path, metadata, children, from_doc=F
               pass
             else:
               metadata[key] = item.text
+          metadata["_GENERATOR"] = "WARNING: Creation date and generator may be erroneous, especially if LibreOffice and date is a few moments ago. Manual inspection may be required."
         elif name == "content.xml":
           metaxml = etree.parse(childpath)
           trackchanges = metaxml.xpath('//*[local-name() = "change-info"]')
@@ -53,4 +55,5 @@ def application_vnd_oasis_opendocument_text(path, metadata, children, from_doc=F
         if not os.path.isdir(childpath):
           insiderer.safedelete(childpath)
   finally:
-    shutil.rmtree(tmp_path)
+    if tmp_path:
+      shutil.rmtree(tmp_path)

@@ -42,7 +42,7 @@ def application_pdf(path, metadata, children):
         except Exception as e:
           print("Can't serialize %s. %s", name, e)
   try:
-    uncompressed_pdf = tempfile.mkstemp(dir='/run/')[1]
+    uncompressed_pdf = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
     stdout = subprocess.check_output(["pdftk", path, "output", uncompressed_pdf, "uncompress"])
     children.extend(extract_jpegs(open(uncompressed_pdf, 'rb').read()))
   except Exception as e:
@@ -91,7 +91,7 @@ def extract_jpegs(data):
 
 def process_a_jpeg(jpeg_data):
   try:
-    jpeg_path = tempfile.mkstemp(dir='/run/')[1]
+    jpeg_path = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
     jpeg_handle = open(jpeg_path, "wb")
     jpeg_handle.write(jpeg_data)
     jpeg_handle.close()

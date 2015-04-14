@@ -15,19 +15,29 @@ import optparse
 import tempfile
 import socket
 import cherrypy
+import hashlib
+insiderer_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(insiderer_dir)
 
 # START DEFAULT CONFIG
 host='0.0.0.0'
-port=443
+port=80
+sslcert = os.path.join(parent_dir, 'cert.pem')
+sslcertkey = os.path.join(parent_dir, 'certkey.pem')
+if os.path.exists(sslcert) and os.path.exists(sslcertkey):
+  port = 443
+
+TMP_DIR = '/media/tmp/'
 # END CONFIG
 parser = optparse.OptionParser()
 parser.add_option("-p", "--port", dest="port", help="Port", type="int")
 parser.add_option("-H", "--host", dest="host", help="Host/IP", type="str")
+parser.add_option("-t", "--tmp", dest="port", help="Temporary directory", type="str")
 (options, args) = parser.parse_args()
 if options.port:
-    port = options.port
+  port = options.port
 if options.host:
-    host = options.host
+  host = options.host
 
 class Site(object):
   exposed = True
@@ -39,18 +49,21 @@ class Site(object):
   def POST(self, **kwargs):
     metadata_files = []
     for key, postfile in kwargs.items():
+      tmp_path = None
       try:
-        tmp_path = tempfile.mkstemp(dir='/run/')[1]
+        try:
+          tmp_path = tempfile.mkstemp(dir=TMP_DIR)[1]
+        except IOError as e:
+          print("FATAL ERROR: Unable to write to " + TMP_DIR)
+          raise e
         handle = open(tmp_path, 'wb')
         handle.write(postfile.file.read())
         handle.close()
         metadata = get_metadata(tmp_path, postfile.filename)
         metadata_files.append(metadata)
-      except Exception as e:
-        print("EXCEPTION", e)
-        pass
       finally:
-        safedelete(tmp_path)
+        if tmp_path is not None:
+          safedelete(tmp_path)
     return metadata_files;
 
 def get_metadata(path, filename):
@@ -58,7 +71,6 @@ def get_metadata(path, filename):
         return re.sub(r'[^a-z]', '_', mimetype)
 
     def sha1OfFile(filepath):
-        import hashlib
         sha = hashlib.sha1()
         if os.path.isdir(filepath):
             return None
@@ -93,6 +105,7 @@ def get_metadata(path, filename):
     if mime_app: #if there was a handler for this mimetype
         mime_app_method = getattr(mime_app, mime_app_name)
         filedata['metadata'] = {}
+        print(mime_app_name)
         getattr(mime_app_method, mime_app_name)(path, filedata['metadata'], filedata['children'])
     if len(filedata['children']) == 0:
         del filedata['children']
@@ -119,17 +132,22 @@ def safedelete(path):
     
 
 if __name__ == '__main__':
+  global_options = {
+    'server.socket_host': host,
+    'server.socket_port': port
+  }
+  if os.path.exists(sslcert):
+    global_options.update({
+      'server.ssl_module':      'builtin',
+      'server.ssl_certificate': sslcert,
+      'server.ssl_private_key': sslcertkey
+    });
+
   conf = {
-      'global': {
-           'server.socket_host': host,
-           'server.socket_port': port,
-           'server.ssl_module': 'builtin',
-           'server.ssl_certificate': '../docvert2015httpscert.pem',
-           'server.ssl_private_key': '../docvert2015https.pem'
-      },
+      'global': global_options,
       '/': {
           'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-          'tools.staticdir.root': os.path.abspath(os.getcwd())
+          'tools.staticdir.root': os.path.abspath(os.path.dirname(__file__))
       },
       '/static': {
           'tools.staticdir.on': True,
