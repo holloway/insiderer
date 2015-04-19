@@ -2,7 +2,6 @@ from wand.image import Image
 import os
 import sys
 import datetime
-import dateutil.parser
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
   sys.path.insert(0, parent_directory)
@@ -41,6 +40,8 @@ def in_blacklist(key, value):
     "exif:Flash": None,
     "exif:ExposureTime": None,
     "exif:ExifVersion": None,
+    "exif:ExifImageWidth": None,
+    "exif:ExifImageLength": None,
     "exif:FlashPixVersion": None,
     "exif:ISOSpeedRatings": None,
     "exif:InteroperabilityIndex": None,
@@ -71,7 +72,7 @@ def in_blacklist(key, value):
       blacklist_values = [blacklist_values]
     if value in blacklist_values:
       return True
-  print(key)
+  print("what", key)
   try:
     timestamp = dateutil.parser.parse(value).timestamp()
     if wasNotRecently(timestamp):
@@ -84,7 +85,7 @@ def in_blacklist(key, value):
         timestamp = dateutil.parser.parse(parts[0] + " " + parts[1]).timestamp()
         if wasNotRecently(timestamp):
           return True
-      except Exception as e:
+      except Exception as e2:
         pass
     print(e)
     pass

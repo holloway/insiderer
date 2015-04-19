@@ -152,12 +152,12 @@ def normalize(obj):
   if isinstance(obj, dict):
     newobj = dict()
     for key in obj.keys():
-      newkey = key
-      newkey = re.sub(r'[\.,_-]', ' ', key).replace("@", "").replace("#","").replace("/","").lower().strip()
+      newkey = str(key)
+      newkey = re.sub(r'[\.,_-]', ' ', newkey).replace("@", "").replace("#","").replace("/","").lower().strip()
       if newkey.startswith("xmlns"):
         continue
       if ":" in newkey:
-        newkey = newkey[newkey.find(":") +1:]
+        newkey = newkey[newkey.rfind(":") + 1:]
       newkey = de_dup(newkey, newobj)
       response = normalize(obj[key])
       if contains_values(response):
@@ -171,7 +171,7 @@ def normalize(obj):
   elif isinstance(obj, int) or obj is None:
     newobj = obj
   else:
-    newobj = obj.replace("\n", " ")
+    newobj = str(obj).replace("\n", " ")
     newobj = normalize_date(newobj)
   return newobj
 
