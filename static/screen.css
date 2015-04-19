@@ -30,12 +30,12 @@ input {
   width:100%;
 }
 
-input[type=file] {
-  position:absolute;
-  top:0px;
-  opacity: 0.01;
-  cursor:pointer;
-}
+  input[type=file] {
+    position:absolute;
+    top:0px;
+    opacity: 0.01;
+    cursor:pointer;
+  }
 
 span {
   color: #37abc8;
@@ -47,7 +47,10 @@ span {
 }
 
 #loading {
-  margin: 10px auto;
+  position:fixed;
+  top: 50%;
+  left: 50%;
+  margin: -60px -60px;
   background: url("loading.gif") no-repeat center center;
   width:150px;
   height:150px;
@@ -55,6 +58,50 @@ span {
   transition: all 0.25s;
 }
 
-#loading.show {
-  transform: scale(1);
+  #loading.show {
+    transform: scale(1);
+  }
+
+iframe {
+  width:200px;
+  height:200px;
 }
+
+ul {
+  list-style:none;
+  margin:0px;
+  padding: 0px;
+}
+
+  ul li {
+    padding: 0.5em 0.8em;
+    margin: 1em auto;
+    clear:both;
+    width:100%;
+    text-align:center;
+  }
+  
+  ul li div {
+      display: inline-block;
+      text-align:left;
+      margin: auto auto;
+      background: #fff;
+      color: #333;
+      border-radius: 5px;     
+      padding: 0.5em 1em;
+  }
+
+    ul li h1 {
+      padding: 5px 0px 0px 0px;
+      margin: 0px;
+      color: #fc7244;
+      font-weight:100;
+      font-size:large;
+    }
+
+    ul li pre {
+      margin: 0px;
+      padding: 0px;
+      font-family:sans-serif;
+      color: #178ba8;
+    }

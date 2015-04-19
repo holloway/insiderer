@@ -60,7 +60,7 @@ def extract_jpegs(data):
   formats = {
       "jpeg": {
           "start": b'\xff\xd8',
-          "end": b'\xff\xd9'
+          "end":   b'\xff\xd9'
       }
   }
 

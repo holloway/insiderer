@@ -16,8 +16,15 @@ import tempfile
 import socket
 import cherrypy
 import hashlib
+import datetime
+import dateutil.parser
+
 insiderer_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(insiderer_dir)
+#from cherrypy.process.plugins import Daemonizer, DropPrivileges, PIDFile
+
+#DropPrivileges(cherrypy.engine, uid=1000, gid=1000).subscribe()
+#Daemonizer(cherrypy.engine).subscribe()
 
 # START DEFAULT CONFIG
 host='0.0.0.0'
@@ -26,6 +33,7 @@ sslcert = os.path.join(parent_dir, 'cert.pem')
 sslcertkey = os.path.join(parent_dir, 'certkey.pem')
 if os.path.exists(sslcert) and os.path.exists(sslcertkey):
   port = 443
+ignore_date_if_seconds_old = 5
 
 TMP_DIR = '/media/tmp/'
 # END CONFIG
@@ -43,28 +51,31 @@ class Site(object):
   exposed = True
 
   def GET(self):
-    return '<!DOCTYPE html><link rel="stylesheet" href="static/screen.css"><body><div id=logo><img src="static/insiderer.png" width=419></div><form method=post enctype=multipart/form-data><span>Choose file(s)</span><input type=file name=a id=files multiple></form><div id=loading></div><script type="text/javascript" src="static/index.js"></script>'
+    return '<!DOCTYPE html><link rel="stylesheet" href="static/screen.css"><body><div id=logo><img src="static/insiderer.png" width=419></div><form method=post enctype=multipart/form-data><span>Choose file(s)</span><input type=file name=a id=files multiple></form><div id=loading></div><ul id="response"></ul><script src="static/index.js"></script>'
 
   @cherrypy.tools.json_out()
   def POST(self, **kwargs):
     metadata_files = []
-    for key, postfile in kwargs.items():
-      tmp_path = None
-      try:
+    for key, postfiles in kwargs.items():
+      if not isinstance(postfiles, list):
+        postfiles = [postfiles]
+      for postfile in postfiles:
+        tmp_path = None
         try:
-          tmp_path = tempfile.mkstemp(dir=TMP_DIR)[1]
-        except IOError as e:
-          print("FATAL ERROR: Unable to write to " + TMP_DIR)
-          raise e
-        handle = open(tmp_path, 'wb')
-        handle.write(postfile.file.read())
-        handle.close()
-        metadata = get_metadata(tmp_path, postfile.filename)
-        metadata_files.append(metadata)
-      finally:
-        if tmp_path is not None:
-          safedelete(tmp_path)
-    return metadata_files;
+          try:
+            tmp_path = tempfile.mkstemp(dir=TMP_DIR)[1]
+          except IOError as e:
+            print("FATAL ERROR: Unable to write to " + TMP_DIR)
+            raise e
+          handle = open(tmp_path, 'wb')
+          handle.write(postfile.file.read())
+          handle.close()
+          metadata = get_metadata(tmp_path, postfile.filename)
+          metadata_files.append(metadata)
+        finally:
+          if tmp_path is not None:
+            safedelete(tmp_path)
+    return normalize(metadata_files)
 
 def get_metadata(path, filename):
     def sanitise(mimetype):
@@ -82,16 +93,16 @@ def get_metadata(path, filename):
             return sha.hexdigest()
 
     mimetype = ms.file(path)
-
+    mime_app_name = sanitise(mimetype.split(";")[0])
     filedata = {}
     filedata['filename'] = filename;
-    filedata['mimetype'] = mimetype;
+    filedata['mimetype'] = mimetype.split(";")[0];
     filedata['sha1'] = sha1OfFile(path);
     filedata['filesize_bytes'] = os.path.getsize(path);
     filedata['children'] = [];
     mime_app = None;
 
-    mime_app_name = sanitise(mimetype.split(";")[0])
+
     import_obj = 'mimes.%s' % mime_app_name
     if not os.path.exists(import_obj.replace('.', '/') + ".py"):
         mime_app_name = sanitise(mimetype.split("/")[0])
@@ -130,6 +141,69 @@ def safedelete(path):
     finally:
       os.unlink(path)
     
+def secureheaders():
+    headers = cherrypy.response.headers
+    headers['X-Frame-Options'] = 'SAMEORIGIN'
+    headers['X-XSS-Protection'] = '1; mode=block'
+    headers['Content-Security-Policy'] = "default-src=self"
+
+def normalize(obj):
+  newobj = None
+  if isinstance(obj, dict):
+    newobj = dict()
+    for key in obj.keys():
+      newkey = key
+      newkey = re.sub(r'[\.,_-]', ' ', key).replace("@", "").replace("#","").replace("/","").lower().strip()
+      if newkey.startswith("xmlns"):
+        continue
+      if ":" in newkey:
+        newkey = newkey[newkey.find(":") +1:]
+      newkey = de_dup(newkey, newobj)
+      response = normalize(obj[key])
+      if contains_values(response):
+        newobj[newkey] = response
+  elif isinstance(obj, list):
+    newobj = list()
+    for i in range(len(obj)):
+      response = normalize(obj[i])
+      if contains_values(response):
+        newobj.append(response)
+  elif isinstance(obj, int) or obj is None:
+    newobj = obj
+  else:
+    newobj = obj.replace("\n", " ")
+    newobj = normalize_date(newobj)
+  return newobj
+
+def normalize_date(datestring):
+  if len(datestring) < 8: # Unfortunately dateutil.parser.parse will think strings like "319/1" are dates, so to avoid that we filter by length. If it's shorter than "YYYYMMDD" then we won't possibly normalizing it into a date.
+    return datestring
+  try:
+    datetime = dateutil.parser.parse(datestring)
+    isoformat = datetime.isoformat()
+    if datetime.isoformat() != "1972-01-19T00:00:00":
+      datestring = isoformat
+  except Exception as e:
+    if datestring.startswith("D:"):
+      return normalize_date(datestring[2:].replace("'", ""))
+  return datestring
+
+
+def contains_values(obj):
+  if isinstance(obj, dict):
+    return len(obj.keys()) > 0
+  elif isinstance(obj, list):
+    return len(obj) > 0
+  return True
+
+def de_dup(key, obj): #deduplicate keys so that they don't overwrite oneanother
+  addon = ""
+  while (key + str(addon)) in obj:
+    if addon == "":
+      addon = 2
+    else:
+      addon += 1
+  return key + str(addon)
 
 if __name__ == '__main__':
   global_options = {
@@ -147,14 +221,15 @@ if __name__ == '__main__':
       'global': global_options,
       '/': {
           'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-          'tools.staticdir.root': os.path.abspath(os.path.dirname(__file__))
+          'tools.staticdir.root': os.path.abspath(os.path.dirname(__file__)),
+          'tools.secureheaders.on': True
       },
       '/static': {
           'tools.staticdir.on': True,
           'tools.staticdir.dir': './static'
       }
   }
+  cherrypy.tools.secureheaders = cherrypy.Tool('before_finalize', secureheaders, priority=60)
   cherrypy.quickstart(Site(), '/', conf)
-
 
 
