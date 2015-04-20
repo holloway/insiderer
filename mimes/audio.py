@@ -1,4 +1,5 @@
 import mutagen
+import mutagen.id3
 from mutagen.easyid3 import EasyID3
 import os
 import sys
@@ -14,6 +15,7 @@ except ImportError as e:
 def audio(path, metadata, children):
   try:
     tags = mutagen.File(path)
+    print(tags)
     saveResults(tags, metadata)
   except Exception as e:
     print("audio excep", e)
@@ -22,19 +24,24 @@ def audio(path, metadata, children):
 def saveResults(audioMetadata, metadata):
   for key in audioMetadata.keys():
     if not in_blacklist(key, audioMetadata[key][0]):
-      len_values = len(audioMetadata[key])
-      if len_values == 1:
-        metadata[key] = audioMetadata[key][0]
-      elif len_values > 1:
-        metadata[key] = audioMetadata[key]
-
+      print(type(audioMetadata[key]))
+      value = audioMetadata[key]
+      if not hasattr(value, '__len__'):
+        value = value.text
+      if len(value) == 1:
+        value = value[0]
+      metadata[key] = value
+        
 def in_blacklist(key, value):
   blacklist = { #note that in the value can either be None, a singular value, or a list of values.
     # As to why these ones are blacklisted the reason is that too much information makes it hard to see the important details.
     # If I got it wrong then please let me know, but do remember that this isn't supposed to display all fields, just important ones (in my opinion)
     # and people can always display metadata in other tools if they want.
-    "----:com.apple.iTunes:iTunSMPB": None    
+    "----:com.apple.iTunes:iTunSMPB": None,
+    "COMM:iTunSMPB:eng": None,
+    "COMM:iTunNORM:eng": None
   }
+  print(key)
   if key in blacklist:
     blacklist_values = blacklist[key]
     if blacklist_values is None:

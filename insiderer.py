@@ -33,7 +33,7 @@ sslcert = os.path.join(parent_dir, 'cert.pem')
 sslcertkey = os.path.join(parent_dir, 'certkey.pem')
 if os.path.exists(sslcert) and os.path.exists(sslcertkey):
   port = 443
-ignore_date_if_seconds_old = 5
+ignore_date_if_seconds_old = 15
 
 TMP_DIR = '/media/tmp/'
 # END CONFIG
@@ -77,50 +77,69 @@ class Site(object):
             safedelete(tmp_path)
     return normalize(metadata_files)
 
+class MimeTypeIcons(object):
+  exposed = True
+
+  def GET(self, mimetype):
+    icons_dir = "static/icons/"
+    icons_local_dir = os.path.join(insiderer_dir, icons_dir)
+    chosen_icon = "text.svg"
+    parts = mimetype.split("/")
+    parts[0] = sanitise(parts[0])
+    parts[1] = sanitise(parts[1])
+    exact_mimetype = parts[0] + "_" + parts[1] + ".svg"
+    basic_mimetype = parts[0] + ".svg"
+    if os.path.exists(os.path.join(icons_local_dir, exact_mimetype)):
+      raise cherrypy.HTTPRedirect(icons_dir + exact_mimetype)
+    elif os.path.exists(os.path.join(icons_local_dir, basic_mimetype)):
+      raise cherrypy.HTTPRedirect(icons_dir + basic_mimetype)
+    else:
+      raise cherrypy.HTTPRedirect(icons_dir + "text.svg")
+
+  
+def sanitise(mimetype):
+  return re.sub(r'[^a-z]', '_', mimetype)
+
 def get_metadata(path, filename):
-    def sanitise(mimetype):
-        return re.sub(r'[^a-z]', '_', mimetype)
+  def sha1OfFile(filepath):
+    sha = hashlib.sha1()
+    if os.path.isdir(filepath):
+      return None
+    with open(filepath, 'rb') as f:
+      while True:
+        block = f.read(2**10) # Magic number: one-megabyte blocks.
+        if not block: break
+        sha.update(block)
+      return sha.hexdigest()
 
-    def sha1OfFile(filepath):
-        sha = hashlib.sha1()
-        if os.path.isdir(filepath):
-            return None
-        with open(filepath, 'rb') as f:
-            while True:
-                block = f.read(2**10) # Magic number: one-megabyte blocks.
-                if not block: break
-                sha.update(block)
-            return sha.hexdigest()
+  mimetype = ms.file(path)
+  mime_app_name = sanitise(mimetype.split(";")[0])
+  filedata = {}
+  filedata['filename'] = filename;
+  filedata['mimetype'] = mimetype.split(";")[0];
+  filedata['sha1'] = sha1OfFile(path);
+  filedata['filesize_bytes'] = os.path.getsize(path);
+  filedata['children'] = [];
+  mime_app = None;
 
-    mimetype = ms.file(path)
-    mime_app_name = sanitise(mimetype.split(";")[0])
-    filedata = {}
-    filedata['filename'] = filename;
-    filedata['mimetype'] = mimetype.split(";")[0];
-    filedata['sha1'] = sha1OfFile(path);
-    filedata['filesize_bytes'] = os.path.getsize(path);
-    filedata['children'] = [];
-    mime_app = None;
-
-
-    import_obj = 'mimes.%s' % mime_app_name
+  import_obj = 'mimes.%s' % mime_app_name
+  if not os.path.exists(import_obj.replace('.', '/') + ".py"):
+    mime_app_name = sanitise(mimetype.split("/")[0])
+    import_obj =  'mimes.%s' % mime_app_name
     if not os.path.exists(import_obj.replace('.', '/') + ".py"):
-        mime_app_name = sanitise(mimetype.split("/")[0])
-        import_obj =  'mimes.%s' % mime_app_name
-        if not os.path.exists(import_obj.replace('.', '/') + ".py"):
-            import_obj = None
+      import_obj = None
 
-    if import_obj:
-        mime_app = __import__(import_obj)
+  if import_obj:
+    mime_app = __import__(import_obj)
 
-    if mime_app: #if there was a handler for this mimetype
-        mime_app_method = getattr(mime_app, mime_app_name)
-        filedata['metadata'] = {}
-        print(mime_app_name)
-        getattr(mime_app_method, mime_app_name)(path, filedata['metadata'], filedata['children'])
-    if len(filedata['children']) == 0:
-        del filedata['children']
-    return filedata
+  if mime_app: #if there was a handler for this mimetype
+    mime_app_method = getattr(mime_app, mime_app_name)
+    filedata['metadata'] = {}
+    print(mime_app_name)
+    getattr(mime_app_method, mime_app_name)(path, filedata['metadata'], filedata['children'])
+  if len(filedata['children']) == 0:
+    del filedata['children']
+  return filedata
 
 
 def safedelete(path):
@@ -224,12 +243,18 @@ if __name__ == '__main__':
           'tools.staticdir.root': os.path.abspath(os.path.dirname(__file__)),
           'tools.secureheaders.on': True
       },
+      '/mimetypeicon': {
+           'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+           'tools.secureheaders.on': True,
+       },
       '/static': {
           'tools.staticdir.on': True,
           'tools.staticdir.dir': './static'
       }
   }
+  webapp = Site()
+  webapp.mimetypeicon = MimeTypeIcons()
   cherrypy.tools.secureheaders = cherrypy.Tool('before_finalize', secureheaders, priority=60)
-  cherrypy.quickstart(Site(), '/', conf)
+  cherrypy.quickstart(webapp, '/', conf)
 
 

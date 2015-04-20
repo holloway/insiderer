@@ -31,7 +31,6 @@ def application_vnd_oasis_opendocument_text(path, metadata, children, from_doc=F
               pass
             else:
               metadata[key] = item.text
-          metadata["_GENERATOR"] = "WARNING: Creation date and generator may be erroneous, especially if LibreOffice and date is a few moments ago. Manual inspection may be required."
         elif name == "content.xml":
           metaxml = etree.parse(childpath)
           trackchanges = metaxml.xpath('//*[local-name() = "change-info"]')
@@ -50,6 +49,7 @@ def application_vnd_oasis_opendocument_text(path, metadata, children, from_doc=F
           pass
         else:
           child = insiderer.get_metadata(childpath, name)
+          if child["mimetype"]:
           children.append(child)
       finally:
         if not os.path.isdir(childpath):

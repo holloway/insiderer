@@ -52,6 +52,9 @@
       li = document.createElement("li");
       div = document.createElement("div");
       h1 = document.createElement("h1");
+      div.style.background = "white url('mimetypeicon?mimetype=" + encodeURIComponent(metadata.mimetype) + "') no-repeat 14px 10px"
+      div.style.backgroundSize = "30px"
+      h1.style.paddingLeft = "35px"
       rawJson = document.createElement("pre");
       h1.textContent = metadata.filename;
       stringified = JSON.stringify(metadata, null, 2);
@@ -64,3 +67,4 @@
   }
 
 }())
+

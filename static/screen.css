@@ -101,7 +101,7 @@ ul {
 
     ul li pre {
       margin: 0px;
-      padding: 0px;
+      padding: 8px 0px 0px 0px;
       font-family:sans-serif;
       color: #178ba8;
     }

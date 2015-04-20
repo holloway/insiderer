@@ -2,6 +2,7 @@ from wand.image import Image
 import os
 import sys
 import datetime
+import dateutil.parser
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
   sys.path.insert(0, parent_directory)
@@ -22,13 +23,14 @@ def image(path, metadata, children):
        pass
 
 def in_blacklist(key, value):
+  key = key.strip()
   blacklist = { #note that in the value can either be None, a singular value, or a list of values.
     # As to why these ones are blacklisted the reason is that too much information makes it hard to see the important details.
     # It seems unlikely the the shutterspeed could possibly be something that reveals information, so that is excluded.
     # If I got it wrong then please let me know, but do remember that this isn't supposed to display all fields, just important ones (in my opinion)
     # and people can always display metadata in other tools if they want.
-    "jpeg:colorspace": "2",
-    "jpeg:sampling-factor": "2x2,1x1,1x1",
+    "jpeg:colorspace": None,
+    "jpeg:sampling-factor": None,
     "exif:ExifOffset":  None,
     "exif:ApertureValue": None,
     "exif:ColorSpace": None,
@@ -62,6 +64,18 @@ def in_blacklist(key, value):
     "exif:YResolution": None,
     "exif:YCbCrPositioning": None,
     "exif:MeteringMode": None,
+    "png:IHDR.color_type": None,
+    "png:sRGB": None,
+    "png:pHYs": None,
+    "png:IHDR.width,height": None,
+    "png:IHDR.interlace_method": None,
+    "png:IHDR.color_type": None,
+    "png:IHDR.bit_depth": None,
+    "png:iCCP": None,
+    "png:cHRM": None,
+    "png:gAMA": None,
+    "png:text": "1 tEXt/zTXt/iTXt chunks were found",
+    "png:bKGD": "chunk was found (see Background color, above)",
     "flash": None,
   }
   if key in blacklist:
@@ -72,7 +86,7 @@ def in_blacklist(key, value):
       blacklist_values = [blacklist_values]
     if value in blacklist_values:
       return True
-  print("what", key)
+  print("what[" + key + "]", value)
   try:
     timestamp = dateutil.parser.parse(value).timestamp()
     if wasNotRecently(timestamp):
@@ -86,14 +100,14 @@ def in_blacklist(key, value):
         if wasNotRecently(timestamp):
           return True
       except Exception as e2:
-        pass
-    print(e)
-    pass
+        print("exception2 something", e2)
+    print("exception something", e)
   return False
 
 def wasNotRecently(timestamp):
   nowTimestamp = datetime.datetime.now().timestamp()
   #if timestamp is from a few seconds ago then we can assume it was made during Insiderer extraction and ignore it
-  if timestamp > nowTimestamp - insiderer.ignore_date_if_seconds_old: 
+  recently = nowTimestamp - insiderer.ignore_date_if_seconds_old
+  if timestamp > recently:
     return True
 

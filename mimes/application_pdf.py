@@ -7,6 +7,7 @@ import os
 import PyPDF2
 import subprocess
 import datetime
+import xmltodict
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
   sys.path.insert(0, parent_directory)
@@ -35,7 +36,7 @@ def application_pdf(path, metadata, children):
               metadata["xmp"][name] = json.loads(str_xmp_data)
             except Exception:
               if str_xmp_data.startswith("<DOM "):
-                metadata["xmp"][name] = xmp_data.toxml()
+                metadata["xmp"][name] = xmltodict.parse(xmp_data.toxml())
               else:
                 metadata["xmp"][name] = str_xml_data
               pass
