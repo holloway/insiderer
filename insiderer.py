@@ -210,7 +210,7 @@ def normalize_date(datestring):
     datestring = normalize_malformed_date(datestring)      
     datetime = dateutil.parser.parse(datestring)
     isoformat = datetime.isoformat()
-    print(datestring, isoformat)
+    #print(datestring, isoformat)
     if datetime.isoformat() != "1972-01-19T00:00:00":
       datestring = isoformat
   except Exception as e:

@@ -16,18 +16,19 @@ except ImportError as e:
 def audio(path, metadata, children):
   try:
     tags = mutagen.File(path)
+    #print(tags)
     saveResults(tags, metadata, children)
   except Exception as e:
-    print("audio excep", e)
+    print("audio exception", e)
     pass
 
 def saveResults(audioMetadata, metadata, children):
   for key in audioMetadata.keys():
-    print("key:", key)
+    #print("key:", key)
     if not in_blacklist(key, audioMetadata[key]):
-      print("TYPE:", type(audioMetadata[key]))  
+      #print("TYPE:", type(audioMetadata[key]))  
       value = audioMetadata[key]
-      if isinstance(audioMetadata[key], mutagen.id3.APIC) and hasattr(value, 'data'):
+      if hasattr(value, 'data'):
         #an embedded binary
         name = "cover"
         if hasattr(value, 'desc'):
@@ -49,7 +50,8 @@ def saveResults(audioMetadata, metadata, children):
       metadata[key] = value
         
 def in_blacklist(key, value):
-  blacklist = { #note that in the value can either be None, a singular value, or a list of values.
+  blacklist = {
+    #note that in the value can either be None, a singular value, or a list of values.
     # As to why these ones are blacklisted the reason is that too much information makes it hard to see the important details.
     # If I got it wrong then please let me know, but do remember that this isn't supposed to display all fields, just important ones (in my opinion)
     # and people can always display metadata in other tools if they want.
@@ -57,7 +59,7 @@ def in_blacklist(key, value):
     "COMM:iTunSMPB:eng": None,
     "COMM:iTunNORM:eng": None
   }
-  print(key)
+  #print(key)
   if key in blacklist:
     blacklist_values = blacklist[key]
     if blacklist_values is None:

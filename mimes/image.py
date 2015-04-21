@@ -34,7 +34,9 @@ def in_blacklist(key, value):
     "exif:ExifOffset":  None,
     "exif:ApertureValue": None,
     "exif:ColorSpace": None,
+    "exif:CustomRendered": None,
     "exif:Compression": None,
+    "exif:ExposureBiasValue": None,
     "exif:JPEGInterchangeFormat": None,
     "exif:JPEGInterchangeFormatLength": None,
     "exif:ImageLength": None,
@@ -45,6 +47,8 @@ def in_blacklist(key, value):
     "exif:ExifVersion": None,
     "exif:ExifImageWidth": None,
     "exif:ExifImageLength": None,
+    "exif:ExposureMode": None,
+    "exif:ExposureProgram": None,
     "exif:FlashPixVersion": None,
     "exif:ISOSpeedRatings": None,
     "exif:InteroperabilityIndex": None,
@@ -52,18 +56,23 @@ def in_blacklist(key, value):
     "exif:InteroperabilityVersion": None,
     "exif:ResolutionUnit": None,
     "exif:ComponentsConfiguration": None,
+    "exif:SceneCaptureType": None,
     "exif:ShutterSpeedValue": None,
     "exif:SubSecTime": None,
     "exif:SubSecTimeDigitized": None,
     "exif:SubSecTimeOriginal": None,
     "exif:FNumber": None,
     "exif:FocalLength": None,
+    "exif:FocalPlaneResolutionUnit": None,
+    "exif:FocalPlaneXResolution": None,
+    "exif:FocalPlaneYResolution": None,
     "exif:Orientation": None,
     "exif:WhiteBalance": None,
     "exif:XResolution": None,
     "exif:XResolution": None,
     "exif:YResolution": None,
     "exif:YCbCrPositioning": None,
+    "exif:MaxApertureValue": None,
     "exif:MeteringMode": None,
     "png:IHDR.color_type": None,
     "png:sRGB": None,
@@ -78,6 +87,8 @@ def in_blacklist(key, value):
     "png:text": "1 tEXt/zTXt/iTXt chunks were found",
     "png:bKGD": "chunk was found (see Background color, above)",
     "flash": None,
+    "unknown": "2",
+    "xmpMM:DerivedFrom": ""
   }
   if key in blacklist:
     blacklist_values = blacklist[key]
@@ -87,7 +98,7 @@ def in_blacklist(key, value):
       blacklist_values = [blacklist_values]
     if value in blacklist_values:
       return True
-  print("what[" + key + "]", value)
+  #print("image.py metadata [" + key + "]", value)
   try:
     timestamp = dateutil.parser.parse(value).timestamp()
     if wasNotRecently(timestamp):
@@ -102,10 +113,13 @@ def in_blacklist(key, value):
   return False
 
 def wasNotRecently(timestamp):
+  try:
+    timestamp = float(timestamp)
+  except ValueError:
+    return False
   nowTimestamp = datetime.datetime.now().timestamp()
   #if timestamp is from a few seconds ago then we can assume it was made during Insiderer extraction and ignore it
   recently = nowTimestamp - insiderer.ignore_date_if_seconds_old
   if timestamp > recently:
-    print("was too recent")
     return True
 
