@@ -5,10 +5,6 @@ import os
 import math
 if sys.version_info[0] < 3:
     raise "Must be using Python 3"
-import magic
-ms = magic.open(magic.MAGIC_NONE)
-ms.load()
-ms.setflags(magic.MAGIC_MIME)
 import re
 import os.path
 import optparse
@@ -101,6 +97,18 @@ def sanitise(mimetype):
   return re.sub(r'[^a-z]', '_', mimetype)
 
 def get_metadata(path, filename):
+  def get_mime(path):
+    import magic
+    #ms = magic.open(magic.MAGIC_NONE)
+    #ms.load()
+    #ms.setflags(magic.MAGIC_MIME)
+    mimey_the_mimetype = magic.from_file(path, mime=True).decode('utf-8')
+    if mimey_the_mimetype == "application/octet-stream": #well that's useless
+      description = magic.from_file(path).decode('utf-8').lower()
+      if "audio " in description:
+        mimey_the_mimetype = "audio/mpeg"
+    return mimey_the_mimetype
+
   def sha1OfFile(filepath):
     sha = hashlib.sha1()
     if os.path.isdir(filepath):
@@ -112,7 +120,8 @@ def get_metadata(path, filename):
         sha.update(block)
       return sha.hexdigest()
 
-  mimetype = ms.file(path)
+  mimetype = get_mime(path)
+   
   mime_app_name = sanitise(mimetype.split(";")[0])
   filedata = {}
   filedata['filename'] = filename;
@@ -198,8 +207,10 @@ def normalize_date(datestring):
   if len(datestring) < 8: # Unfortunately dateutil.parser.parse will think strings like "319/1" are dates, so to avoid that we filter by length. If it's shorter than "YYYYMMDD" then we won't possibly normalizing it into a date.
     return datestring
   try:
+    datestring = normalize_malformed_date(datestring)      
     datetime = dateutil.parser.parse(datestring)
     isoformat = datetime.isoformat()
+    print(datestring, isoformat)
     if datetime.isoformat() != "1972-01-19T00:00:00":
       datestring = isoformat
   except Exception as e:
@@ -207,6 +218,13 @@ def normalize_date(datestring):
       return normalize_date(datestring[2:].replace("'", ""))
   return datestring
 
+def normalize_malformed_date(datestring):
+  if (datestring.startswith("19") or datestring.startswith("20")) and datestring.count(" ") == 1 and datestring.count(":") == 4:
+    # Unfortunately the dateutil parser will read "2014:09:15 14:06:02" as "2015-04-21T14:06:02" (as of today) because it doesn't like colons between year:month:day so we detect that scenario and change it
+    parts = datestring.split(" ")
+    datestring = parts[0].replace(":", "/") + " " + parts[1]
+    return datestring
+  return datestring
 
 def contains_values(obj):
   if isinstance(obj, dict):

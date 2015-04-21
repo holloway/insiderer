@@ -3,6 +3,7 @@ import mutagen.id3
 from mutagen.easyid3 import EasyID3
 import os
 import sys
+import tempfile
 
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
@@ -15,20 +16,35 @@ except ImportError as e:
 def audio(path, metadata, children):
   try:
     tags = mutagen.File(path)
-    print(tags)
-    saveResults(tags, metadata)
+    saveResults(tags, metadata, children)
   except Exception as e:
     print("audio excep", e)
     pass
 
-def saveResults(audioMetadata, metadata):
+def saveResults(audioMetadata, metadata, children):
   for key in audioMetadata.keys():
-    if not in_blacklist(key, audioMetadata[key][0]):
-      print(type(audioMetadata[key]))
+    print("key:", key)
+    if not in_blacklist(key, audioMetadata[key]):
+      print("TYPE:", type(audioMetadata[key]))  
       value = audioMetadata[key]
-      if not hasattr(value, '__len__'):
+      if isinstance(audioMetadata[key], mutagen.id3.APIC) and hasattr(value, 'data'):
+        #an embedded binary
+        name = "cover"
+        if hasattr(value, 'desc'):
+          name = value.desc
+        childpath = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
+        try:
+          tmp_handle = open(childpath, "wb")
+          tmp_handle.write(value.data)
+          tmp_handle.close()
+          child = insiderer.get_metadata(childpath, name)
+          children.append(child)
+        finally:
+           insiderer.safedelete(childpath)
+        continue
+      if not hasattr(value, '__len__') and hasattr(value, 'text'):
         value = value.text
-      if len(value) == 1:
+      if hasattr(value, '__len__') and len(value) == 1:
         value = value[0]
       metadata[key] = value
         

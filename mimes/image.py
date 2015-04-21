@@ -34,6 +34,7 @@ def in_blacklist(key, value):
     "exif:ExifOffset":  None,
     "exif:ApertureValue": None,
     "exif:ColorSpace": None,
+    "exif:Compression": None,
     "exif:JPEGInterchangeFormat": None,
     "exif:JPEGInterchangeFormatLength": None,
     "exif:ImageLength": None,
@@ -92,16 +93,12 @@ def in_blacklist(key, value):
     if wasNotRecently(timestamp):
       return True
   except Exception as e:
-    if value.startswith("19") or value.startswith("20"):
-      try:
-        parts = value.split()
-        parts[0] = parts[0].replace(":", "/")
-        timestamp = dateutil.parser.parse(parts[0] + " " + parts[1]).timestamp()
-        if wasNotRecently(timestamp):
-          return True
-      except Exception as e2:
-        print("exception2 something", e2)
-    print("exception something", e)
+    try:
+      timestamp = insiderer.normalize_malformed_date(value)
+      if wasNotRecently(timestamp):
+        return True
+    except Exception as e2:
+      print("exception2 something", e2)
   return False
 
 def wasNotRecently(timestamp):
@@ -109,5 +106,6 @@ def wasNotRecently(timestamp):
   #if timestamp is from a few seconds ago then we can assume it was made during Insiderer extraction and ignore it
   recently = nowTimestamp - insiderer.ignore_date_if_seconds_old
   if timestamp > recently:
+    print("was too recent")
     return True
 

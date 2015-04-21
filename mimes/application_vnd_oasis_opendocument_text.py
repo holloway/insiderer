@@ -49,7 +49,6 @@ def application_vnd_oasis_opendocument_text(path, metadata, children, from_doc=F
           pass
         else:
           child = insiderer.get_metadata(childpath, name)
-          if child["mimetype"]:
           children.append(child)
       finally:
         if not os.path.isdir(childpath):

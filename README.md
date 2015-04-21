@@ -14,7 +14,7 @@ Quickstart Guide (Debian/Ubuntu)
 ================================
 
     sudo apt-get install python3 python3-magic python3-pip libmagickwand-dev python-pdfminer python3-tk libffi-dev libssl-dev
-    sudo pip3 install cherrypy pypdf2 exifread wand cython pyOpenSSL xmltodict python-dateutil
+    sudo pip3 install cherrypy pypdf2 exifread wand cython pyOpenSSL xmltodict python-dateutil python-magic
     mkdir /media/tmp
 
 Add this line to your /etc/fstab (adjust size accordingly)
