@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "date": "2000-04-11T00:00:00",
+    "language": "en",
+    "format": "image/svg+xml",
+    "publisher": "Example Organization",
+    "rdf": {
+      "rdf": {
+        "description": {
+          "format": "image/svg+xml",
+          "date": "2000-04-11T00:00:00",
+          "publisher": "Example Organization",
+          "description": "$three $bar $thousands $dollars $from 1998 $through 2000",
+          "language": "en",
+          "about": "http://example.org/myfoo",
+          "creator": {
+            "bag": {
+              "li": [
+                "Irving Bird",
+                "Mary Lambert"
+              ]
+            }
+          },
+          "title": "MyFoo Financial Report"
+        }
+      }
+    },
+    "description2": "$three $bar $thousands $dollars $from 1998 $through 2000",
+    "description": {
+      "desc": {
+        "descr": {
+          "text": "The global description uses markup from the          namespace.",
+          "emph": "myfoo"
+        },
+        "title": "This is a financial report",
+        "scene": {
+          "what": "widget $growth",
+          "when": "1998 $through 2000",
+          "contains": "$three $graph-bar"
+        }
+      }
+    },
+    "title": "MyFoo Financial Report"
+  },
+  "filename": "what.svg",
+  "sha1": "71c5fef6a7826a39e16d277353662e0f89794d12",
+  "filesize bytes": 1370,
+  "mimetype": "image/svg+xml"
+}

@@ -1,0 +1,52 @@
+body {
+  font-family:sans-serif;
+}
+
+h1 {
+  text-align:center;
+  font-weight:100;
+  margin-bottom: -1.5em;
+}
+
+#runAllTests {
+  text-align:right;
+  padding-right:0.5em;
+}
+
+#runAllTests button {
+  padding: 0.5em;
+  font-size:large;
+}
+
+ul {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+}
+
+li {
+  background: #eee;
+  margin: 0.5em 0px;
+  padding: 0.5em 0.5em 0.5em 1em;
+}
+
+li button {
+  float:right;
+}
+
+li button.pass {
+  background: green;
+  color: white;
+}
+
+li button.fail {
+  background: red;
+  color: white;
+}
+
+
+li::after {
+  content: "";
+  display:block;
+  clear:both;
+}

@@ -7,13 +7,16 @@ if sys.version_info[0] < 3:
     raise "Must be using Python 3"
 import re
 import os.path
+import glob
 import optparse
 import tempfile
 import socket
 import cherrypy
+import json
 import hashlib
 import datetime
 import dateutil.parser
+import shutil
 
 insiderer_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(insiderer_dir)
@@ -47,7 +50,7 @@ class Site(object):
   exposed = True
 
   def GET(self):
-    return '<!DOCTYPE html><link rel="stylesheet" href="static/screen.css"><body><div id=logo><img src="static/insiderer.png" width=419></div><form method=post enctype=multipart/form-data><span>Choose file(s)</span><input type=file name=a id=files multiple></form><div id=loading></div><ul id="response"></ul><script src="static/index.js"></script>'
+    return open('static/index.html', 'r').read()
 
   @cherrypy.tools.json_out()
   def POST(self, **kwargs):
@@ -67,6 +70,7 @@ class Site(object):
           handle.write(postfile.file.read())
           handle.close()
           metadata = get_metadata(tmp_path, postfile.filename)
+          print(metadata)
           metadata_files.append(metadata)
         finally:
           if tmp_path is not None:
@@ -92,6 +96,36 @@ class MimeTypeIcons(object):
     else:
       raise cherrypy.HTTPRedirect(icons_dir + "text.svg")
 
+class Tests(object):
+  exposed = True
+
+  def GET(self, path="", **kwargs):
+    if path == "":
+      return open("static/tests/index.html", 'r').read()
+    elif path == "list":
+      list = []
+      test_pattern = os.path.join(insiderer_dir, "tests") + "/*"
+      paths = glob.glob(test_pattern)
+      for path in paths:
+        if not path.endswith(".json"):
+          list.append(os.path.basename(path))
+      cherrypy.response.headers['Content-Type'] = "application/json"
+      return json.dumps(list).encode("utf-8")
+    test = {}
+    actual_metadata = None
+    tmp_path = None
+    try:
+      tmp_path = tempfile.mkstemp(dir=TMP_DIR)[1]
+      source = os.path.join("tests", path)
+      shutil.copyfile(source, tmp_path)
+      actual_metadata = json.dumps(normalize(get_metadata(tmp_path, os.path.basename(path))))
+    finally:
+      if tmp_path is not None:
+        safedelete(tmp_path)
+    print(    actual_metadata)
+    expected_metadata = open(os.path.join("tests", path + ".json"), 'rb').read().decode('utf-8')
+    cherrypy.response.headers['Content-Type'] = "application/json"
+    return json.dumps({'filename':path, 'actual':actual_metadata, 'expected':expected_metadata}).encode('utf-8')
   
 def sanitise(mimetype):
   return re.sub(r'[^a-z]', '_', mimetype)
@@ -99,9 +133,6 @@ def sanitise(mimetype):
 def get_metadata(path, filename):
   def get_mime(path):
     import magic
-    #ms = magic.open(magic.MAGIC_NONE)
-    #ms.load()
-    #ms.setflags(magic.MAGIC_MIME)
     mimey_the_mimetype = magic.from_file(path, mime=True).decode('utf-8')
     if mimey_the_mimetype == "application/octet-stream": #well that's useless
       description = magic.from_file(path).decode('utf-8').lower()
@@ -144,12 +175,11 @@ def get_metadata(path, filename):
   if mime_app: #if there was a handler for this mimetype
     mime_app_method = getattr(mime_app, mime_app_name)
     filedata['metadata'] = {}
-    print(mime_app_name)
+    #print(mime_app_name)
     getattr(mime_app_method, mime_app_name)(path, filedata['metadata'], filedata['children'])
   if len(filedata['children']) == 0:
     del filedata['children']
   return filedata
-
 
 def safedelete(path):
     if os.path.isdir(path):
@@ -210,7 +240,6 @@ def normalize_date(datestring):
     datestring = normalize_malformed_date(datestring)      
     datetime = dateutil.parser.parse(datestring)
     isoformat = datetime.isoformat()
-    #print(datestring, isoformat)
     if datetime.isoformat() != "1972-01-19T00:00:00":
       datestring = isoformat
   except Exception as e:
@@ -265,6 +294,10 @@ if __name__ == '__main__':
            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
            'tools.secureheaders.on': True,
        },
+      '/tests/*': {
+           'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+           'tools.secureheaders.on': True,
+       },
       '/static': {
           'tools.staticdir.on': True,
           'tools.staticdir.dir': './static'
@@ -272,6 +305,7 @@ if __name__ == '__main__':
   }
   webapp = Site()
   webapp.mimetypeicon = MimeTypeIcons()
+  webapp.tests = Tests()
   cherrypy.tools.secureheaders = cherrypy.Tool('before_finalize', secureheaders, priority=60)
   cherrypy.quickstart(webapp, '/', conf)
 

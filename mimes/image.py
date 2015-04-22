@@ -86,6 +86,8 @@ def in_blacklist(key, value):
     "png:gAMA": None,
     "png:text": "1 tEXt/zTXt/iTXt chunks were found",
     "png:bKGD": "chunk was found (see Background color, above)",
+    "png:PLTE.number_colors": None,
+    "png:tRNS": None,
     "flash": None,
     "unknown": "2",
     "xmpMM:DerivedFrom": ""
@@ -98,7 +100,7 @@ def in_blacklist(key, value):
       blacklist_values = [blacklist_values]
     if value in blacklist_values:
       return True
-  #print("image.py metadata [" + key + "]", value)
+  print("image.py metadata [" + key + "]", value)
   try:
     timestamp = dateutil.parser.parse(value).timestamp()
     if wasNotRecently(timestamp):
