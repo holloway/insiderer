@@ -14,9 +14,12 @@ except ImportError as e:
 def image(path, metadata, children):
     try:
       with Image(filename=path) as i:
-          for key, value in i.metadata.items():
+          keys = i.metadata.keys()
+          keys.sort()
+          for key in keys:
+            value = i.metadata[key]
             if not in_blacklist(key, value):
-              newkey = insiderer.de_dup(key, metadata)
+              newkey = insiderer.de_dup(key, metadata) # note usage comment in de_dup
               metadata[newkey] = value;
     except Exception as e:
        print("Error parsing image", e)
@@ -100,7 +103,7 @@ def in_blacklist(key, value):
       blacklist_values = [blacklist_values]
     if value in blacklist_values:
       return True
-  print("image.py metadata [" + key + "]", value)
+  print("mimes/image.py metadata [" + key + "]", value)
   try:
     timestamp = dateutil.parser.parse(value).timestamp()
     if wasNotRecently(timestamp):

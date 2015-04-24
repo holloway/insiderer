@@ -70,7 +70,6 @@ class Site(object):
           handle.write(postfile.file.read())
           handle.close()
           metadata = get_metadata(tmp_path, postfile.filename)
-          print(metadata)
           metadata_files.append(metadata)
         finally:
           if tmp_path is not None:
@@ -209,7 +208,9 @@ def normalize(obj):
   newobj = None
   if isinstance(obj, dict):
     newobj = dict()
-    for key in obj.keys():
+    keys = list(obj.keys())
+    keys.sort()
+    for key in keys:
       newkey = str(key)
       newkey = re.sub(r'[\.,_-]', ' ', newkey).replace("@", "").replace("#","").replace("/","").lower().strip()
       if newkey.startswith("xmlns"):
@@ -263,6 +264,7 @@ def contains_values(obj):
   return True
 
 def de_dup(key, obj): #deduplicate keys so that they don't overwrite oneanother
+  # Note that key order must be sorted before using de_dup or else two keys that are "description" and "exif:description" will be be insiderer.normalize()d and de_duped to description and description2 in random order, and randomly break tests
   addon = ""
   while (key + str(addon)) in obj:
     if addon == "":
