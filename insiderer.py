@@ -128,7 +128,7 @@ class Tests(object):
       if tmp_path is not None:
         safedelete(tmp_path)
     cherrypy.log(actual_metadata)
-    expected_metadata = open(os.path.join("tests", path + ".json"), 'rb').read().decode('utf-8')
+    expected_metadata = open(os.path.join(insiderer_dir, "tests", path + ".json"), 'rb').read().decode('utf-8')
     cherrypy.response.headers['Content-Type'] = "application/json"
     return json.dumps({'filename':path, 'actual':actual_metadata, 'expected':expected_metadata}).encode('utf-8')
   
