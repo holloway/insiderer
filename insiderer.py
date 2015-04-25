@@ -39,7 +39,7 @@ TMP_DIR = '/media/tmp/'
 parser = optparse.OptionParser()
 parser.add_option("-p", "--port", dest="port", help="Port", type="int")
 parser.add_option("-H", "--host", dest="host", help="Host/IP", type="str")
-parser.add_option("-t", "--tmp", dest="port", help="Temporary directory", type="str")
+parser.add_option("-t", "--tmp", dest="TMP_DIR", help="Temporary directory", type="str")
 (options, args) = parser.parse_args()
 if options.port:
   port = options.port

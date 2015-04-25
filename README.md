@@ -2,7 +2,7 @@
 <img src="static/insiderer.png" alt="Insiderer">
 </p>
 
-Insiderer looks inside files for metadata and hidden files and content. This metadat may include information on authorship, deleted content, and geolocation among many other pieces of information.
+Insiderer looks inside files for metadata and hidden files and content. This metadata may include information on authorship, deleted content, and geolocation among many other pieces of information.
 
 Unlike most other equivalent tools, Insiderer attempts to report on every file within the files you give it. Many modern formats are essentially containers for many different types of files, and so Insiderer allows you to view a hierarchy of metadata about the files you give it. For example, .docx files may contain images and those images may include authorship, geolocation, and subdocuments. Those subdocuments may have deleted content.
 
@@ -26,8 +26,15 @@ Usage
 
     python3 insiderer.py
 
+    python3 insiderer.py --port=8080 --host=localhost --tmp=/tmp/
+
+HTTPS
+=====
+
+Insiderer runs connections over SSL if there are two files found in the directory *above* named `certkey.pem` and `cert.pem`.
+
 Recommended Dependencies
-=====================
+========================
 
 [Docvert](https://github.com/holloway/docvert-python3) is expected to be running on port 8080. Without Docvert it can't process office files.
 
