@@ -52,7 +52,7 @@ class Site(object):
   exposed = True
 
   def GET(self):
-    return open('static/index.html', 'r').read()
+    return open(os.path.join(insiderer_dir, 'static/index.html'), 'r').read()
 
   @cherrypy.tools.json_out()
   def POST(self, **kwargs):
@@ -102,7 +102,7 @@ class Tests(object):
 
   def GET(self, path="", **kwargs):
     if path == "":
-      return open("static/tests/index.html", 'r').read()
+      return open(os.path.join(insiderer_dir, "static/tests/index.html"), 'r').read()
     elif path == "list":
       list = []
       test_pattern = os.path.join(insiderer_dir, "tests") + "/*"
