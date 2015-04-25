@@ -26,7 +26,7 @@ def application_msword(path, metadata, children):
   if response is None:
     return
 
-  print("response.content",response.content)
+  #print("response.content",response.content)
   zipdata = io.BytesIO(response.content)
   myzip = zipfile.ZipFile(zipdata)
 
