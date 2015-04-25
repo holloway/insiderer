@@ -121,7 +121,7 @@ class Tests(object):
     tmp_path = None
     try:
       tmp_path = tempfile.mkstemp(dir=TMP_DIR)[1]
-      source = os.path.join("tests", path)
+      source = os.path.join(insiderer_dir, "tests", path)
       shutil.copyfile(source, tmp_path)
       actual_metadata = json.dumps(normalize(get_metadata(tmp_path, os.path.basename(path))))
     finally:
@@ -175,6 +175,10 @@ def get_metadata(path, filename):
     import_obj =  'mimes.%s' % mime_app_name
     if not os.path.exists(os.path.join(insiderer_dir, import_obj.replace('.', '/') + ".py")):
       import_obj = None
+    else:
+      print(import_obj + " exists2")    
+  else:
+    print(import_obj + " exists1")
 
   if import_obj:
     #cherrypy.log("import", import_obj)
