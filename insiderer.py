@@ -72,10 +72,11 @@ class Site(object):
           handle = open(tmp_path, 'wb')
           handle.write(postfile.file.read())
           handle.close()
+          #print("md")
           metadata = get_metadata(tmp_path, postfile.filename)
           metadata_files.append(metadata)
         except Exception as e:
-          print(e)
+          print("[insiderer.py] exception", e)
         finally:
           if tmp_path is not None:
             safedelete(tmp_path)
@@ -155,7 +156,9 @@ def get_metadata(path, filename):
         sha.update(block)
       return sha.hexdigest()
 
+  #print("a1")
   mimetype = get_mime(path)
+  #print("a2", mimetype)
    
   mime_app_name = sanitise(mimetype.split(";")[0])
   filedata = {}
@@ -170,10 +173,11 @@ def get_metadata(path, filename):
   if not os.path.exists(import_obj.replace('.', '/') + ".py"):
     mime_app_name = sanitise(mimetype.split("/")[0])
     import_obj =  'mimes.%s' % mime_app_name
-    if not os.path.exists(import_obj.replace('.', '/') + ".py"):
+    if not os.path.exists(os.path.join(insiderer_dir, import_obj.replace('.', '/') + ".py")):
       import_obj = None
 
   if import_obj:
+    #print("import", import_obj)
     mime_app = __import__(import_obj)
 
   if mime_app: #if there was a handler for this mimetype
