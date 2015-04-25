@@ -20,6 +20,7 @@ import shutil
 
 insiderer_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(insiderer_dir)
+sys.path.append(insiderer_dir)
 
 # START DEFAULT CONFIG
 host='0.0.0.0'
@@ -73,6 +74,8 @@ class Site(object):
           handle.close()
           metadata = get_metadata(tmp_path, postfile.filename)
           metadata_files.append(metadata)
+        except Exception as e:
+          print(e)
         finally:
           if tmp_path is not None:
             safedelete(tmp_path)
@@ -123,7 +126,7 @@ class Tests(object):
     finally:
       if tmp_path is not None:
         safedelete(tmp_path)
-    print(    actual_metadata)
+    print(actual_metadata)
     expected_metadata = open(os.path.join("tests", path + ".json"), 'rb').read().decode('utf-8')
     cherrypy.response.headers['Content-Type'] = "application/json"
     return json.dumps({'filename':path, 'actual':actual_metadata, 'expected':expected_metadata}).encode('utf-8')
