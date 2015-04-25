@@ -4,6 +4,7 @@ from mutagen.easyid3 import EasyID3
 import os
 import sys
 import tempfile
+import cherrypy
 
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
@@ -16,20 +17,20 @@ except ImportError as e:
 def audio(path, metadata, children):
   try:
     if not os.path.exists(path):
-      print("File was deleted before use")
+      cherrypy.log("File was deleted before use")
       return
     tags = mutagen.File(path)
-    #print(tags)
+    #cherrypy.log(tags)
     saveResults(tags, metadata, children)
   except Exception as e:
-    print("audio exception", e)
+    cherrypy.log("audio exception", e)
     pass
 
 def saveResults(audioMetadata, metadata, children):
   for key in audioMetadata.keys():
-    #print("key:", key)
+    #cherrypy.log("key:", key)
     if not in_blacklist(key, audioMetadata[key]):
-      #print("TYPE:", type(audioMetadata[key]))  
+      #cherrypy.log("TYPE:", type(audioMetadata[key]))  
       value = audioMetadata[key]
       if hasattr(value, 'data'):
         #an embedded binary
@@ -62,7 +63,7 @@ def in_blacklist(key, value):
     "COMM:iTunSMPB:eng": None,
     "COMM:iTunNORM:eng": None
   }
-  #print(key)
+  #cherrypy.log(key)
   if key in blacklist:
     blacklist_values = blacklist[key]
     if blacklist_values is None:

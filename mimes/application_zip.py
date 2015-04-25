@@ -4,6 +4,7 @@ import os
 import sys
 import shutil
 from lxml import etree
+import cherrypy
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
   sys.path.insert(0, parent_directory)

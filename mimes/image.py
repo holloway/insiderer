@@ -3,6 +3,7 @@ import os
 import sys
 import datetime
 import dateutil.parser
+import cherrypy
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
   sys.path.insert(0, parent_directory)
@@ -22,7 +23,7 @@ def image(path, metadata, children):
               newkey = insiderer.de_dup(key, metadata) # note usage comment in de_dup
               metadata[newkey] = value;
     except Exception as e:
-       print("Error parsing image", e)
+       cherrypy.log("Error parsing image", e)
        pass
 
 def in_blacklist(key, value):
@@ -103,7 +104,7 @@ def in_blacklist(key, value):
       blacklist_values = [blacklist_values]
     if value in blacklist_values:
       return True
-  print("mimes/image.py metadata [" + key + "]", value)
+  cherrypy.log("mimes/image.py metadata [" + key + "]", value)
   try:
     timestamp = dateutil.parser.parse(value).timestamp()
     if wasNotRecently(timestamp):
@@ -114,7 +115,7 @@ def in_blacklist(key, value):
       if wasNotRecently(timestamp):
         return True
     except Exception as e2:
-      print("exception2 something", e2)
+      cherrypy.log("exception2 something", e2)
   return False
 
 def wasNotRecently(timestamp):

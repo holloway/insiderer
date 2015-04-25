@@ -67,16 +67,16 @@ class Site(object):
           try:
             tmp_path = tempfile.mkstemp(dir=TMP_DIR)[1]
           except IOError as e:
-            print("FATAL ERROR: Unable to write to " + TMP_DIR)
+            cherrypy.log("FATAL ERROR: Unable to write to " + TMP_DIR)
             raise e
           handle = open(tmp_path, 'wb')
           handle.write(postfile.file.read())
           handle.close()
-          #print("md")
+          #cherrypy.log("md")
           metadata = get_metadata(tmp_path, postfile.filename)
           metadata_files.append(metadata)
         except Exception as e:
-          print("[insiderer.py] exception", e)
+          cherrypy.log("[insiderer.py] exception", e)
         finally:
           if tmp_path is not None:
             safedelete(tmp_path)
@@ -127,7 +127,7 @@ class Tests(object):
     finally:
       if tmp_path is not None:
         safedelete(tmp_path)
-    print(actual_metadata)
+    cherrypy.log(actual_metadata)
     expected_metadata = open(os.path.join("tests", path + ".json"), 'rb').read().decode('utf-8')
     cherrypy.response.headers['Content-Type'] = "application/json"
     return json.dumps({'filename':path, 'actual':actual_metadata, 'expected':expected_metadata}).encode('utf-8')
@@ -156,9 +156,9 @@ def get_metadata(path, filename):
         sha.update(block)
       return sha.hexdigest()
 
-  #print("a1")
+  #cherrypy.log("a1")
   mimetype = get_mime(path)
-  #print("a2", mimetype)
+  #cherrypy.log("a2", mimetype)
    
   mime_app_name = sanitise(mimetype.split(";")[0])
   filedata = {}
@@ -177,13 +177,13 @@ def get_metadata(path, filename):
       import_obj = None
 
   if import_obj:
-    #print("import", import_obj)
+    #cherrypy.log("import", import_obj)
     mime_app = __import__(import_obj)
 
   if mime_app: #if there was a handler for this mimetype
     mime_app_method = getattr(mime_app, mime_app_name)
     filedata['metadata'] = {}
-    #print(mime_app_name)
+    #cherrypy.log(mime_app_name)
     getattr(mime_app_method, mime_app_name)(path, filedata['metadata'], filedata['children'])
   if len(filedata['children']) == 0:
     del filedata['children']
@@ -191,7 +191,7 @@ def get_metadata(path, filename):
 
 def safedelete(path):
     if os.path.isdir(path):
-      print("Can't safedelete directory", path)
+      cherrypy.log("Can't safedelete directory", path)
       return
     sector = 4096
     data = ""
@@ -203,7 +203,7 @@ def safedelete(path):
         for x in range(0, cycles):
           safehandle.write(os.urandom(sector))
     except Exception as e:
-      print(e)
+      cherrypy.log(e)
     finally:
       os.unlink(path)
     

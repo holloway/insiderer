@@ -3,6 +3,7 @@ import tempfile
 import os
 import sys
 import shutil
+import cherrypy
 from lxml import etree
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
@@ -21,7 +22,7 @@ def application_vnd_oasis_opendocument_text(path, metadata, children, from_doc=F
     for name in odtzip.namelist():
       childpath = tmp_path + "/" + name
       try:
-        #print(childpath, name)
+        #cherrypy.log(childpath, name)
         if name == "meta.xml":
           metaxml = etree.parse(childpath)
           metadatas = metaxml.xpath('/*/*/*')

@@ -8,6 +8,7 @@ import PyPDF2
 import subprocess
 import datetime
 import xmltodict
+import cherrypy
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
   sys.path.insert(0, parent_directory)
@@ -41,13 +42,13 @@ def application_pdf(path, metadata, children):
                 metadata["xmp"][name] = str_xml_data
               pass
         except Exception as e:
-          print("Can't serialize %s. %s", name, e)
+          cherrypy.log("Can't serialize %s. %s", name, e)
   try:
     uncompressed_pdf = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
     stdout = subprocess.check_output(["pdftk", path, "output", uncompressed_pdf, "uncompress"])
     children.extend(extract_jpegs(open(uncompressed_pdf, 'rb').read()))
   except Exception as e:
-    print("PDF exception", e)  
+    cherrypy.log("PDF exception", e)  
   finally:
     insiderer.safedelete(uncompressed_pdf)
 
@@ -100,7 +101,7 @@ def process_a_jpeg(jpeg_data):
     jpeg_metadata = dict()
     mimes.image.image(jpeg_path, jpeg_metadata, None)
   except Exception as e:
-    print("PDF JPEG exception", e)  
+    cherrypy.log("PDF JPEG exception", e)  
   finally:
     insiderer.safedelete(jpeg_path)
     
