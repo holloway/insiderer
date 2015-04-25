@@ -176,9 +176,9 @@ def get_metadata(path, filename):
     if not os.path.exists(os.path.join(insiderer_dir, import_obj.replace('.', '/') + ".py")):
       import_obj = None
     else:
-      print(import_obj + " exists2")    
+      cherrypy.log(import_obj + " exists2")    
   else:
-    print(import_obj + " exists1")
+    cherrypy.log(import_obj + " exists1")
 
   if import_obj:
     #cherrypy.log("import", import_obj)
