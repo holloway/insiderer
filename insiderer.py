@@ -170,7 +170,7 @@ def get_metadata(path, filename):
   mime_app = None;
 
   import_obj = 'mimes.%s' % mime_app_name
-  if not os.path.exists(import_obj.replace('.', '/') + ".py"):
+  if not os.path.exists(os.path.join(insiderer_dir, import_obj.replace('.', '/') + ".py")):
     mime_app_name = sanitise(mimetype.split("/")[0])
     import_obj =  'mimes.%s' % mime_app_name
     if not os.path.exists(os.path.join(insiderer_dir, import_obj.replace('.', '/') + ".py")):
