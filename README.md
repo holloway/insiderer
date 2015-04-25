@@ -13,8 +13,8 @@ Insiderer is a work in progress. If you find a bug, or if a file doesn't work, p
 Quickstart Guide (Debian/Ubuntu)
 ================================
 
-    sudo apt-get install python3 python3-magic python3-pip libmagickwand-dev python-pdfminer python3-tk libffi-dev libssl-dev
-    sudo pip3 install cherrypy pypdf2 exifread wand cython pyOpenSSL xmltodict python-dateutil python-magic
+    sudo apt-get install python3 python3-magic python3-pip python3-lxml python3-gdbm libmagickwand-dev python-pdfminer python3-tk libffi-dev libssl-dev pdftk
+    sudo pip3 install cherrypy pypdf2 exifread wand cython pyOpenSSL xmltodict python-dateutil python-magic mutagen
     mkdir /media/tmp
 
 Add this line to your /etc/fstab (adjust size accordingly)

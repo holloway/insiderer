@@ -20,10 +20,6 @@ import shutil
 
 insiderer_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(insiderer_dir)
-#from cherrypy.process.plugins import Daemonizer, DropPrivileges, PIDFile
-
-#DropPrivileges(cherrypy.engine, uid=1000, gid=1000).subscribe()
-#Daemonizer(cherrypy.engine).subscribe()
 
 # START DEFAULT CONFIG
 host='0.0.0.0'
@@ -33,18 +29,24 @@ sslcertkey = os.path.join(parent_dir, 'certkey.pem')
 if os.path.exists(sslcert) and os.path.exists(sslcertkey):
   port = 443
 ignore_date_if_seconds_old = 15
-
+daemon=False
 TMP_DIR = '/media/tmp/'
 # END CONFIG
 parser = optparse.OptionParser()
 parser.add_option("-p", "--port", dest="port", help="Port", type="int")
 parser.add_option("-H", "--host", dest="host", help="Host/IP", type="str")
 parser.add_option("-t", "--tmp", dest="TMP_DIR", help="Temporary directory", type="str")
+parser.add_option("-d", "--daemon", dest="daemon", help="Daemonise? any value, false by default", type="str")
 (options, args) = parser.parse_args()
 if options.port:
   port = options.port
 if options.host:
   host = options.host
+
+if daemon:
+  from cherrypy.process.plugins import Daemonizer, DropPrivileges, PIDFile
+  DropPrivileges(cherrypy.engine, uid=1000, gid=1000).subscribe()
+  Daemonizer(cherrypy.engine).subscribe()
 
 class Site(object):
   exposed = True

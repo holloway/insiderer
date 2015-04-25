@@ -2,6 +2,7 @@ import requests
 import io
 import zipfile
 import tempfile
+import os
 import mimes.application_vnd_oasis_opendocument_text as application_vnd_oasis_opendocument_text
 try:
   parent_directory = os.path.dirname(os.path.dirname(__file__))
