@@ -20,7 +20,10 @@
     setTimeout(function(){
       var formdata = new FormData(form),
           ajax = new XMLHttpRequest();
-      ajax.open("POST", "/", true);
+      ajax.onerror = function(event){
+        loading.classList.remove("show");
+        alert("Can't access Insiderer. Check your network connection, and please try again later.");
+      };
       ajax.onload = function(event, second) {
         var metadata;
         loading.classList.remove("show");
@@ -31,6 +34,7 @@
         }       
         renderResponse(metadata);
       }
+      ajax.open("POST", "/", true);
       ajax.send(formdata);
     }, 500);
   });
