@@ -15,6 +15,9 @@ except ImportError as e:
 
 def audio(path, metadata, children):
   try:
+    if not os.path.exists(path):
+      print("File was deleted before use")
+      return
     tags = mutagen.File(path)
     #print(tags)
     saveResults(tags, metadata, children)
