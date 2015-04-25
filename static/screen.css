@@ -41,8 +41,8 @@ span {
   color: #37abc8;
   display: block;
   text-align:center;
-  margin:0.5em;
-  padding: 0.2em;
+  margin:5px;
+  padding: 0em;
   font-weight:bold;
 }
 
@@ -105,3 +105,20 @@ ul {
       font-family:sans-serif;
       color: #178ba8;
     }
+
+#tests {
+  position:absolute;
+  display:block;
+  padding: 5px;
+  top: 0px;
+  right: 0px;
+  text-decoration:none;
+  color: #36d9cf;
+  background: #e2f8f7;
+  border-left: solid 2px #aee5e3
+  border-bottom: solid 2px #aee5e3;
+}
+
+#tests:hover {
+  background:white;
+}

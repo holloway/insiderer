@@ -14,6 +14,7 @@
   };
 
   files.addEventListener("change", function(){
+    if(files.value.length === 0) return;
     loading.classList.add("show");
 		window.location.hash = "loading";
     setTimeout(function(){

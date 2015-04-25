@@ -1,42 +1,88 @@
 body {
+  background: url("background.jpg");
   font-family:sans-serif;
 }
 
+button {
+  cursor:pointer;
+}
+
+#logo {
+  text-align:center;
+  background: #f6f6f6;
+  transform: skewX(-2deg) skewY(-1deg);
+  width: 500px;
+  border-radius: 10px;
+  padding:10px;
+  margin: 20px auto 0px auto;
+}
+
 h1 {
+  display:block;
+  max-width:300px;
+  margin: 30px auto .5em auto;
+  transform: skewX(2deg) skewY(1deg);
+  background: #fff;
   text-align:center;
   font-weight:100;
-  margin-bottom: -1.5em;
+  color: #16a9af;
 }
 
 #runAllTests {
   text-align:right;
-  padding-right:0.5em;
+  padding-right:0px;
+  max-width:500px;
+  margin:0px auto;
 }
 
 #runAllTests button {
   padding: 0.5em;
-  font-size:large;
+  font-size:x-small;
+  background: none;
+  border:1px solid #adf3ef;
+  border-radius:4px;
+  color: white;
+  font-weight:bold;
+}
+
+#runAllTests button:hover {
+  background: white;
+  color: #16a9af;
 }
 
 ul {
   list-style: none;
   padding: 0px;
-  margin: 0px;
+  margin: 0px auto;
+  max-width:500px;
+  
 }
 
 li {
-  background: #eee;
+  background: #fff;
   margin: 0.5em 0px;
   padding: 0.5em 0.5em 0.5em 1em;
+  color: #16a9af;
+  font-weight:bold;
 }
 
 li button {
   float:right;
+  background: url("background.jpg");
+  border:none;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: white;
+}
+
+li button:hover {
+  background: #adf3ef;
 }
 
 li button.pass {
   background: green;
-  color: white;
+  border: none;
+  padding: 4px 5px;
 }
 
 li button.fail {
@@ -49,4 +95,17 @@ li::after {
   content: "";
   display:block;
   clear:both;
+}
+
+#back {
+  position:absolute;
+  display:block;
+  padding: 5px;
+  top: 0px;
+  left: 0px;
+  text-decoration:none;
+  color: #36d9cf;
+  background: #e2f8f7;
+  border-left: solid 2px #aee5e3
+  border-bottom: solid 2px #aee5e3;
 }

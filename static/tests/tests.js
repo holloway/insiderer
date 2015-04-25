@@ -21,8 +21,25 @@
     })
   };
 
-  var button = document.getElementsByTagName("button")[0];
+  var runAllTestsButton = document.getElementById("runAllTests").getElementsByTagName("button")[0];
   var results = document.getElementById("results");
+
+  runAllTestsButton.addEventListener("click", function(){
+    var buttons = results.getElementsByTagName("button"), i;
+    for(i = 0; i < buttons.length; i++){
+      setTimeout(function(i){
+        return function(){
+          var button = buttons[i],
+              event  = document.createEvent("MouseEvents");
+          event.initEvent("click", true, true);
+          event.synthetic = true;
+          button.dispatchEvent(event, true);
+        }
+      }(i), i * 500);
+    } 
+  })
+
+
 
   results.addEventListener("click", function(event){
     var currentNode = event.target;
@@ -44,12 +61,12 @@
       console.log(actual_norm)
       console.log(expected_norm)
       buttonFilename.className = "fail";
+      buttonFilename.textContent = "Test Fail :(";
     } else {
       buttonFilename.className = "pass";
+      buttonFilename.textContent = "Test Pass!";
     }
   }
-
-  
  
   http_get_json("/tests/list", function(list){
     for(var i = 0; i < list.length; i++){
