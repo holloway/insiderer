@@ -14,7 +14,7 @@ except ImportError as e:
 def image(path, metadata, children):
     try:
       with Image(filename=path) as i:
-          keys = i.metadata.keys()
+          keys = list(i.metadata.keys())
           keys.sort()
           for key in keys:
             value = i.metadata[key]
