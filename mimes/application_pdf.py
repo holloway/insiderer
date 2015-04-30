@@ -18,35 +18,39 @@ except ImportError as e:
   pass
 
 def application_pdf(path, metadata, children):
-  pdf_document = PyPDF2.PdfFileReader(open(path, 'rb'))
-  metadata["info"] = pdf_document.getDocumentInfo()
-  metadata["xmp"] = dict()
-  xmp = pdf_document.getXmpMetadata()
-  if xmp:
-    for name in dir(xmp):
-      if name.startswith("_"):
-        pass
-      else:
+  try:
+    uncompressed_pdf = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
+    stdout = subprocess.check_output(["pdftk", path, "output", uncompressed_pdf, "uncompress"])
+    children.extend(extract_jpegs(open(uncompressed_pdf, 'rb').read()))
+    pdf_document = PyPDF2.PdfFileReader(open(uncompressed_pdf, 'rb'))
+    if pdf_document.isEncrypted:
+      pdf_document.decrypt("")
+    metadata["info"] = pdf_document.getDocumentInfo()
+    metadata["xmp"] = dict()
+    xmp = pdf_document.getXmpMetadata()
+    if xmp:
+      for name in dir(xmp):
         try:
           xmp_data = getattr(xmp, name)
+          str_xmp_data = ""
           if isinstance(xmp_data, datetime.datetime):
             metadata["xmp"][name] = str(xmp_data.now())
           else:
             str_xmp_data = str(xmp_data)
             try:
               metadata["xmp"][name] = json.loads(str_xmp_data)
-            except Exception:
-              if str_xmp_data.startswith("<DOM "):
-                metadata["xmp"][name] = xmltodict.parse(xmp_data.toxml())
+            except Exception as e:
+              if str_xmp_data is None:
+                pass
+              elif str_xmp_data.startswith("<"):
+                try:
+                  metadata["xmp"][name] = xmltodict.parse(xmp_data.toxml())
+                except Exception as e:
+                  pass
               else:
-                metadata["xmp"][name] = str_xml_data
-              pass
+                metadata["xmp"][name] = str_xmp_data
         except Exception as e:
           cherrypy.log("Can't serialize %s. %s", name, e)
-  try:
-    uncompressed_pdf = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
-    stdout = subprocess.check_output(["pdftk", path, "output", uncompressed_pdf, "uncompress"])
-    children.extend(extract_jpegs(open(uncompressed_pdf, 'rb').read()))
   except Exception as e:
     cherrypy.log("PDF exception", e)  
   finally:
