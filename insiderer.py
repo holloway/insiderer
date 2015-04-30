@@ -296,7 +296,7 @@ if __name__ == '__main__':
     global_options.update({
       'server.ssl_module':      'builtin',
       'server.ssl_certificate': sslcert,
-      'server.ssl_private_key': sslprivatekey
+      'server.ssl_private_key': sslprivatekey,
       'server.ssl_certificate_chain':sslcertchain
     });
 

@@ -31,7 +31,8 @@ Usage
 HTTPS
 =====
 
-Insiderer runs connections over SSL if there are two files found in the directory *above* named `certkey.pem` and `cert.pem`.
+Insiderer runs connections over SSL if there are two files found in the directory *above* named 'cert.crt', 'certprivatekey.key', and 'certchain.crt'.
+
 
 Recommended Dependencies
 ========================
