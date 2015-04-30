@@ -25,9 +25,10 @@ sys.path.append(insiderer_dir)
 # START DEFAULT CONFIG
 host='0.0.0.0'
 port=80
-sslcert = os.path.join(parent_dir, 'cert.pem')
-sslcertkey = os.path.join(parent_dir, 'certkey.pem')
-if os.path.exists(sslcert) and os.path.exists(sslcertkey):
+sslcert = os.path.join(parent_dir, 'cert.crt')
+sslprivatekey = os.path.join(parent_dir, 'certprivatekey.key')
+sslcertchain = os.path.join(parent_dir, 'certchain.crt')
+if os.path.exists(sslcert): #assume other files are there
   port = 443
 ignore_date_if_seconds_old = 15
 daemon=False
@@ -295,7 +296,8 @@ if __name__ == '__main__':
     global_options.update({
       'server.ssl_module':      'builtin',
       'server.ssl_certificate': sslcert,
-      'server.ssl_private_key': sslcertkey
+      'server.ssl_private_key': sslprivatekey
+      'server.ssl_certificate_chain':sslcertchain
     });
 
   conf = {
@@ -324,4 +326,9 @@ if __name__ == '__main__':
   cherrypy.tools.secureheaders = cherrypy.Tool('before_finalize', secureheaders, priority=60)
   cherrypy.quickstart(webapp, '/', conf)
 
+  server2 = cherrypy._cpserver.Server()
+  server2.socket_port=80
+  server2._socket_host="0.0.0.0"
+  server2.thread_pool=30
+  server2.subscribe()
 
