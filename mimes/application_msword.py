@@ -16,9 +16,10 @@ except ImportError as e:
 def application_msword(path, metadata, children):
   response = None
   try:
-    response = requests.post('http://localhost:8080/web-service',
-      files={'upload_file[]': open(path,'rb')},
-      data={'pipeline':'open document', 'afterconversion': 'zip'})
+    with open(path,'rb') as handle:
+      response = requests.post('http://localhost:8080/web-service',
+        files={'upload_file[]': handle.read()},
+        data={'pipeline':'open document', 'afterconversion': 'zip'})
   except Exception as e:
     metadata["INSIDERER_WARNING"] = "Could not access Docvert on localhost:8080"
     pass

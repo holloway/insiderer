@@ -54,7 +54,8 @@ class Site(object):
   exposed = True
 
   def GET(self):
-    return open(os.path.join(insiderer_dir, 'static/index.html'), 'r').read()
+    with open(os.path.join(insiderer_dir, 'static/index.html'), 'r') as f:
+      return f.read()
 
   @cherrypy.tools.json_out()
   def POST(self, **kwargs):
@@ -73,7 +74,6 @@ class Site(object):
           handle = open(tmp_path, 'wb')
           handle.write(postfile.file.read())
           handle.close()
-          #cherrypy.log("md")
           metadata = get_metadata(tmp_path, postfile.filename)
           metadata_files.append(metadata)
         except Exception as e:
@@ -129,7 +129,9 @@ class Tests(object):
       if tmp_path is not None:
         safedelete(tmp_path)
     cherrypy.log(actual_metadata)
-    expected_metadata = open(os.path.join(insiderer_dir, "tests", path + ".json"), 'rb').read().decode('utf-8')
+    expected_metadata = None
+    with open(os.path.join(insiderer_dir, "tests", path + ".json"), 'rb') as f:
+      expected_metadata = f.read().decode('utf-8')
     cherrypy.response.headers['Content-Type'] = "application/json"
     return json.dumps({'filename':path, 'actual':actual_metadata, 'expected':expected_metadata}).encode('utf-8')
   

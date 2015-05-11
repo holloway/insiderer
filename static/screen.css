@@ -7,23 +7,41 @@ body {
   text-align:center;
   background: #f6f6f6;
   transform: skewX(2deg) skewY(1deg);
-  width: 500px;
+  max-width: 500px;
   border-radius: 10px;
   padding:10px;
   margin: 20px auto 0px auto;
 }
+
+  #logo img {
+    width:100%;
+    height:100%;
+    max-width:419px;
+    max-height:154px;
+  }
 
 
 form {
   display:block;
   background: #fff;
   margin-top:10px;
-  width:300px;
+  width:100%;
+  max-width:300px;
   margin: 20px auto;
   position:relative;
   padding: 1px;
   transform: skewX(-1deg) skewY(-1deg);
 }
+
+  form span {
+    color: #37abc8;
+    display: block;
+    text-align:center;
+    margin:5px;
+    padding: 0em;
+    font-weight:bold;
+  }
+
 
 input {
   display: block;
@@ -37,14 +55,6 @@ input {
     cursor:pointer;
   }
 
-span {
-  color: #37abc8;
-  display: block;
-  text-align:center;
-  margin:5px;
-  padding: 0em;
-  font-weight:bold;
-}
 
 #loading {
   position:fixed;

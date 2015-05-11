@@ -39,11 +39,11 @@ def saveResults(audioMetadata, metadata, children):
           name = value.desc
         childpath = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
         try:
-          tmp_handle = open(childpath, "wb")
-          tmp_handle.write(value.data)
-          tmp_handle.close()
-          child = insiderer.get_metadata(childpath, name)
-          children.append(child)
+          with open(childpath, "wb") as tmp_handle:
+            tmp_handle.write(value.data)
+            tmp_handle.close()
+            child = insiderer.get_metadata(childpath, name)
+            children.append(child)
         finally:
            insiderer.safedelete(childpath)
         continue

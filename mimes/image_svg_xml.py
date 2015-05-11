@@ -62,11 +62,11 @@ def image_svg_xml(path, metadata, children):
       image_data = base64.standard_b64decode( href[href.find(base64_prefix) + len(base64_prefix):] )
       try:
         image_path = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
-        image_handle = open(image_path, "wb")
-        image_handle.write(image_data)
-        image_handle.close()
-        child = insiderer.get_metadata(image_path, name)
-        children.append(child)
+        with open(image_path, "wb") as image_handle:
+          image_handle.write(image_data)
+          image_handle.close()
+          child = insiderer.get_metadata(image_path, name)
+          children.append(child)
       finally:
         insiderer.safedelete(image_path)
  

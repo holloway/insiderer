@@ -21,36 +21,38 @@ def application_pdf(path, metadata, children):
   try:
     uncompressed_pdf = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
     stdout = subprocess.check_output(["pdftk", path, "output", uncompressed_pdf, "uncompress"])
-    children.extend(extract_jpegs(open(uncompressed_pdf, 'rb').read()))
-    pdf_document = PyPDF2.PdfFileReader(open(uncompressed_pdf, 'rb'))
-    if pdf_document.isEncrypted:
-      pdf_document.decrypt("")
-    metadata["info"] = pdf_document.getDocumentInfo()
-    metadata["xmp"] = dict()
-    xmp = pdf_document.getXmpMetadata()
-    if xmp:
-      for name in dir(xmp):
-        try:
-          xmp_data = getattr(xmp, name)
-          str_xmp_data = ""
-          if isinstance(xmp_data, datetime.datetime):
-            metadata["xmp"][name] = str(xmp_data.now())
-          else:
-            str_xmp_data = str(xmp_data)
-            try:
-              metadata["xmp"][name] = json.loads(str_xmp_data)
-            except Exception as e:
-              if str_xmp_data is None:
-                pass
-              elif str_xmp_data.startswith("<"):
-                try:
-                  metadata["xmp"][name] = xmltodict.parse(xmp_data.toxml())
-                except Exception as e:
+    with open(uncompressed_pdf, 'rb') as pdfhandle:
+      pdfdata = pdfhandle.read()
+      children.extend(extract_jpegs(pdfdata))
+      pdf_document = PyPDF2.PdfFileReader(pdfhandle)
+      if pdf_document.isEncrypted:
+        pdf_document.decrypt("")
+      metadata["info"] = pdf_document.getDocumentInfo()
+      metadata["xmp"] = dict()
+      xmp = pdf_document.getXmpMetadata()
+      if xmp:
+        for name in dir(xmp):
+          try:
+            xmp_data = getattr(xmp, name)
+            str_xmp_data = ""
+            if isinstance(xmp_data, datetime.datetime):
+              metadata["xmp"][name] = str(xmp_data.now())
+            else:
+              str_xmp_data = str(xmp_data)
+              try:
+                metadata["xmp"][name] = json.loads(str_xmp_data)
+              except Exception as e:
+                if str_xmp_data is None:
                   pass
-              else:
-                metadata["xmp"][name] = str_xmp_data
-        except Exception as e:
-          cherrypy.log("Can't serialize %s. %s", name, e)
+                elif str_xmp_data.startswith("<"):
+                  try:
+                    metadata["xmp"][name] = xmltodict.parse(xmp_data.toxml())
+                  except Exception as e:
+                    pass
+                else:
+                  metadata["xmp"][name] = str_xmp_data
+          except Exception as e:
+            cherrypy.log("Can't serialize %s. %s", name, e)
   except Exception as e:
     cherrypy.log("PDF exception", e)  
   finally:
@@ -98,12 +100,12 @@ def extract_jpegs(data):
 def process_a_jpeg(jpeg_data):
   try:
     jpeg_path = tempfile.mkstemp(dir=insiderer.TMP_DIR)[1]
-    jpeg_handle = open(jpeg_path, "wb")
-    jpeg_handle.write(jpeg_data)
-    jpeg_handle.close()
-    import mimes.image
-    jpeg_metadata = dict()
-    mimes.image.image(jpeg_path, jpeg_metadata, None)
+    with open(jpeg_path, 'wb') as jpeg_handle:
+      jpeg_handle.write(jpeg_data)
+      jpeg_handle.close()
+      import mimes.image
+      jpeg_metadata = dict()
+      mimes.image.image(jpeg_path, jpeg_metadata, None)
   except Exception as e:
     cherrypy.log("PDF JPEG exception", e)  
   finally:
